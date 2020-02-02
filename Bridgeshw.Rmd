@@ -22,3 +22,8 @@ subset <- data[myvars]
 names <- c("statecode", "structure.number", "countycode", "route.prefix", "service.level", "maintenance.responsibility", "yearbuilt", "avg.daily.traffic", "historical.significance", "deck.condition", "superstructure.condition", "channel.condition")
 names(subset) <- names
 ```
+
+```{r}
+str(subset)
+head(subset)
+```
