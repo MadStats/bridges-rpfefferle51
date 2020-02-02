@@ -27,3 +27,27 @@ names(subset) <- names
 str(subset)
 head(subset)
 ```
+
+```{r}
+#Investigating Bridges with conditions labeled "poor" (4) or below
+library(ggplot2)
+library(dplyr)
+subset.poor <- subset %>% 
+  filter(superstructure.condition <= 4)
+
+states.poor <- ggplot(subset.poor, aes(x=statecode)) + geom_bar()
+states.poor + theme(axis.text.x = element_text(size = 5, angle=45))
+#Visibly it's clear state codes 17, 19, and 42 have many more "poor" rated bridges than others
+#Illinois, Iowa, and Pennsylvania
+```
+
+```{r}
+#Filtering between Idaho, Indiana and Oregon
+subset.poor.states <- subset.poor %>% 
+  filter(statecode %in% c(17, 19, 42))
+
+ggplot(subset.poor.states, aes(x=yearbuilt)) + geom_bar() + xlim(1890, 1990)
+#We see a lot of the poor conditioned bridges were built in the year 1900
+```
+
+
