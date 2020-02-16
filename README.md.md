@@ -1,7 +1,7 @@
 Bridges
 ================
 
-``` r warning = F
+``` r
 #Importing Data
 library(readr)
 temp <- tempfile()
@@ -47,11 +47,11 @@ data <- read_delim(unz(temp, "2018HwyBridgesDelimitedAllStates.txt"), ",", col_n
     ## .... ....................... ...................... ...... ............
     ## See problems(...) for more details.
 
-``` r warning = F
+``` r
 unlink(temp)
 ```
 
-``` r warning = F
+``` r
 #Subsetting to make smaller dataset with variables of interest
 
 myvars <- c("STATE_CODE_001", "STRUCTURE_NUMBER_008", "COUNTY_CODE_003", "ROUTE_PREFIX_005B", "SERVICE_LEVEL_005C", "MAINTENANCE_021", "YEAR_BUILT_027", "ADT_029", "HISTORY_037", "DECK_COND_058", "SUPERSTRUCTURE_COND_059", "CHANNEL_COND_061")
@@ -60,7 +60,14 @@ names <- c("statecode", "structure.number", "countycode", "route.prefix", "servi
 names(subset) <- names
 ```
 
-``` r warning = F
+``` r
+subset$superstructure.condition <- as.numeric(as.character(subset$superstructure.condition))
+```
+
+    ## Warning: NAs introduced by coercion
+
+``` r
+subset$avg.daily.traffic <- as.numeric(as.character(subset$avg.daily.traffic))
 str(subset)
 ```
 
@@ -75,7 +82,7 @@ str(subset)
     ##  $ avg.daily.traffic         : num  50 159 375 300 6200 3620 400 150 350 15 ...
     ##  $ historical.significance   : num  5 5 5 5 4 1 2 5 5 5 ...
     ##  $ deck.condition            : chr  "8" "8" "5" "7" ...
-    ##  $ superstructure.condition  : chr  "8" "8" "5" "7" ...
+    ##  $ superstructure.condition  : num  8 8 5 7 6 5 4 4 7 4 ...
     ##  $ channel.condition         : chr  "8" "7" "6" "7" ...
     ##  - attr(*, "problems")=Classes 'tbl_df', 'tbl' and 'data.frame': 65769 obs. of  5 variables:
     ##   ..$ row     : int  4178 4964 5205 7829 8780 10119 13352 13980 14974 15190 ...
@@ -84,7 +91,7 @@ str(subset)
     ##   ..$ actual  : chr  "134" "134" " " "134" ...
     ##   ..$ file    : chr  "<connection>" "<connection>" "<connection>" "<connection>" ...
 
-``` r 
+``` r
 #Investigating Bridges with conditions labeled "poor" (4) or below
 library(ggplot2)
 library(dplyr)
@@ -109,7 +116,7 @@ states.poor <- ggplot(subset.poor, aes(x=statecode)) + geom_bar()
 states.poor + theme(axis.text.x = element_text(size = 5, angle=45))
 ```
 
-![](Bridges_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
+![](README.md_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
 
 ``` r
 #Visibly it's clear state codes 17, 19, and 42 have many more "poor" rated bridges than others
@@ -127,13 +134,13 @@ ggplot(., aes(x=yearbuilt)) + geom_bar() + xlim(1890, 1990)
 
     ## Warning: Removed 2 rows containing missing values (geom_bar).
 
-![](Bridges_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
+![](README.md_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
 
 ``` r
 #We see a lot of the poor conditioned bridges were built in the year 1900
 ```
 
-```{r}
+``` r
 # Get county fips code
 # BLS Fips code analysis
 #Table with FIPS code state + county combo + BLS stat (Civilian Labor Force) + bridges
@@ -142,7 +149,7 @@ library(blscrapeR)
 county_df <- get_bls_county()
 ```
 
-```{r}
+``` r
 subset$fips = paste(subset$statecode, subset$countycode, sep = "")
 
 tidy.data <-  subset %>% 
@@ -150,13 +157,9 @@ tidy.data <-  subset %>%
   summarise(mean.condition = mean(superstructure.condition, na.rm = T),
             mean.traffic = mean(avg.daily.traffic)) %>% 
     left_join(select(county_df, labor_force, unemployed_rate, fips), by = "fips")
-
 ```
 
-
-
-
-```{r}
+``` r
 #Filtering for Maricopa County, AZ
 maricopa <- county_df %>% 
   filter(fips == "04013") 
@@ -166,17 +169,4 @@ bridges_maricopa <- subset %>%
          countycode == "013")
 
 bridges_maricopa$fips = paste(bridges_maricopa$statecode, bridges_maricopa$countycode, sep = "")
-```
-
-```{r}
-#Join the BLS employment date 
-maricopa_full <- bridges_maricopa %>% 
-  left_join(maricopa, by = "fips")
-
-maricopa_full$superstructure.condition <- as.numeric(as.character(maricopa_full$superstructure.condition))
-maricopa_full$average_weekly_wages <- as.numeric(as.character(maricopa_full$average_weekly_wages))
-
-maricopa_full %>% 
-  summarise(mean_bridgecondition = mean(superstructure.condition, na.rm = T),
-            mean_weeklyincome = mean(average_weekly_wages, na.rm = T))
 ```
