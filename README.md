@@ -143,6 +143,7 @@ county_df <- get_bls_county()
 ```
 
 ```{r}
+#TIDY DATA with summary
 subset$fips = paste(subset$statecode, subset$countycode, sep = "")
 
 tidy.data <-  subset %>% 
@@ -151,6 +152,7 @@ tidy.data <-  subset %>%
             mean.traffic = mean(avg.daily.traffic)) %>% 
     left_join(select(county_df, labor_force, unemployed_rate, fips), by = "fips")
 
+head(tidy.data)
 ```
 
 

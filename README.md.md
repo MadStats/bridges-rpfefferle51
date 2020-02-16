@@ -150,6 +150,7 @@ county_df <- get_bls_county()
 ```
 
 ``` r
+#TIDY DATA with summary
 subset$fips = paste(subset$statecode, subset$countycode, sep = "")
 
 tidy.data <-  subset %>% 
@@ -157,7 +158,19 @@ tidy.data <-  subset %>%
   summarise(mean.condition = mean(superstructure.condition, na.rm = T),
             mean.traffic = mean(avg.daily.traffic)) %>% 
     left_join(select(county_df, labor_force, unemployed_rate, fips), by = "fips")
+
+head(tidy.data)
 ```
+
+    ## # A tibble: 6 x 5
+    ##   fips  mean.condition mean.traffic labor_force unemployed_rate
+    ##   <chr>          <dbl>        <dbl>       <dbl>           <dbl>
+    ## 1 01001           6.52        3615.       26436             2.3
+    ## 2 01003           6.66        6039.       95405             2.4
+    ## 3 01005           6.98        1183.        8608             3.2
+    ## 4 01007           6.75        1647.        8909             2.5
+    ## 5 01009           5.99        3167.       25735             2.3
+    ## 6 01011           6.67         982.        4786             3.6
 
 ``` r
 #Filtering for Maricopa County, AZ
